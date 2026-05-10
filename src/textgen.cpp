@@ -1,25 +1,37 @@
+// Copyright 2024 Your Name
 #include "textgen.h"
+
+#include <algorithm>
+#include <fstream>
 #include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
 
-MarkovGenerator::MarkovGenerator(int prefSize, int maxGen, unsigned seed)
-    : prefixSize(prefSize), maxGenerated(maxGen), rng(seed) {}
+MarkovGenerator::MarkovGenerator(int pref_size, int max_gen, unsigned seed)
+    : prefix_size_(pref_size), max_generated_(max_gen), rng_(seed) {}
 
-prefix MarkovGenerator::makePrefix(const std::vector<std::string> &words, int size)
+prefix MarkovGenerator::MakePrefix(const std::vector<std::string> &words,
+                                   int size)
 {
     prefix p;
-    for (size_t i = 0; i < std::min(words.size(), static_cast<size_t>(size)); ++i)
+    for (size_t i = 0;
+         i < std::min(words.size(), static_cast<size_t>(size)); ++i)
     {
         p.push_back(words[i]);
     }
     return p;
 }
 
-void MarkovGenerator::addSuffix(statetab &table, const prefix &pref, const std::string &suffix)
+void MarkovGenerator::AddSuffix(statetab &table,
+                                const prefix &pref,
+                                const std::string &suffix)
 {
     table[pref].push_back(suffix);
 }
 
-std::string MarkovGenerator::randomChoice(const std::vector<std::string> &vec, std::mt19937 &rng)
+std::string MarkovGenerator::RandomChoice(
+    const std::vector<std::string> &vec, std::mt19937 &rng)
 {
     if (vec.empty())
         return "";
@@ -27,7 +39,7 @@ std::string MarkovGenerator::randomChoice(const std::vector<std::string> &vec, s
     return vec[dist(rng)];
 }
 
-void MarkovGenerator::readInputFile(const std::string &filename)
+void MarkovGenerator::ReadInputFile(const std::string &filename)
 {
     std::ifstream file(filename);
     if (!file.is_open())
@@ -37,49 +49,52 @@ void MarkovGenerator::readInputFile(const std::string &filename)
     }
 
     std::string word;
-    std::vector<std::string> allWords;
+    std::vector<std::string> all_words;
     while (file >> word)
     {
         if (!word.empty())
-            allWords.push_back(word);
+        {
+            all_words.push_back(word);
+        }
     }
     file.close();
 
-    if (allWords.empty())
+    if (all_words.empty())
     {
         std::cerr << "Warning: No valid words found in " << filename << std::endl;
         return;
     }
-    std::cout << "✅ Loaded " << allWords.size() << " words from input." << std::endl;
+    std::cout << "Loaded " << all_words.size() << " words from input."
+              << std::endl;
 
     prefix pref;
-    for (const auto &w : allWords)
+    for (const auto &w : all_words)
     {
-        if (pref.size() == static_cast<size_t>(prefixSize))
+        if (pref.size() == static_cast<size_t>(prefix_size_))
         {
-            states[pref].push_back(w);
+            states_[pref].push_back(w);
             pref.pop_front();
         }
         pref.push_back(w);
     }
 
-    for (int i = 0; i < prefixSize; ++i)
+    for (int i = 0; i < prefix_size_; ++i)
     {
-        if (pref.size() == static_cast<size_t>(prefixSize))
+        if (pref.size() == static_cast<size_t>(prefix_size_))
         {
-            states[pref].push_back(NOPREFIX);
+            states_[pref].push_back(NOPREFIX);
             pref.pop_front();
         }
         pref.push_back(NOPREFIX);
     }
 }
 
-std::string MarkovGenerator::generateText()
+std::string MarkovGenerator::GenerateText()
 {
-    if (states.empty())
+    if (states_.empty())
         return "Error: State table is empty.";
 
-    prefix pref = states.begin()->first;
+    prefix pref = states_.begin()->first;
     std::ostringstream result;
     for (const auto &w : pref)
     {
@@ -88,26 +103,26 @@ std::string MarkovGenerator::generateText()
     }
 
     int count = static_cast<int>(pref.size());
-    while (count < maxGenerated)
+    while (count < max_generated_)
     {
-        auto it = states.find(pref);
+        auto it = states_.find(pref);
 
-        // Если цепочка оборвалась или встретился маркер конца,
-        // переходим на случайный префикс из таблицы
         bool restart = false;
-        if (it == states.end())
+        if (it == states_.end())
         {
             restart = true;
         }
         else
         {
-            std::string next = randomChoice(it->second, rng);
+            std::string next = RandomChoice(it->second, rng_);
             if (next == NOPREFIX)
+            {
                 restart = true;
+            }
             else
             {
                 result << next << " ";
-                count++;
+                ++count;
                 pref.pop_front();
                 pref.push_back(next);
                 continue;
@@ -116,9 +131,10 @@ std::string MarkovGenerator::generateText()
 
         if (restart)
         {
-            size_t idx = std::uniform_int_distribution<size_t>(0, states.size() - 1)(rng);
-            auto rand_it = states.begin();
-            std::advance(rand_it, idx);
+            size_t idx = std::uniform_int_distribution<size_t>(
+                0, states_.size() - 1)(rng_);
+            auto rand_it = states_.begin();
+            std::advance(rand_it, static_cast<long>(idx));
             pref = rand_it->first;
         }
     }

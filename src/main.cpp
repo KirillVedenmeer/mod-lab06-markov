@@ -1,40 +1,44 @@
+// Copyright 2024 Your Name
 #include "textgen.h"
-#include <iostream>
+
+#include <cstdlib>
 #include <fstream>
+#include <iostream>
+#include <string>
 
 int main(int argc, char *argv[])
 {
-    std::string inputFile = "input/source.txt";
-    std::string outputFile = "result/gen.txt";
-    int prefSize = 2;
-    int maxWords = 1000;
+    std::string input_file = "input/source.txt";
+    std::string output_file = "result/gen.txt";
+    int pref_size = 2;
+    int max_words = 1000;
     unsigned seed = 42;
 
     if (argc > 1)
-        inputFile = argv[1];
+        input_file = argv[1];
     if (argc > 2)
-        outputFile = argv[2];
+        output_file = argv[2];
     if (argc > 3)
-        prefSize = std::stoi(argv[3]);
+        pref_size = std::stoi(argv[3]);
     if (argc > 4)
-        maxWords = std::stoi(argv[4]);
+        max_words = std::stoi(argv[4]);
     if (argc > 5)
         seed = std::stoi(argv[5]);
 
-    MarkovGenerator gen(prefSize, maxWords, seed);
-    gen.readInputFile(inputFile);
-    std::string text = gen.generateText();
+    MarkovGenerator gen(pref_size, max_words, seed);
+    gen.ReadInputFile(input_file);
+    std::string text = gen.GenerateText();
 
-    std::ofstream out(outputFile);
+    std::ofstream out(output_file);
     if (out.is_open())
     {
         out << text;
         out.close();
-        std::cout << "Generated text saved to " << outputFile << std::endl;
+        std::cout << "Generated text saved to " << output_file << std::endl;
     }
     else
     {
-        std::cerr << "Error: Cannot write to " << outputFile << std::endl;
+        std::cerr << "Error: Cannot write to " << output_file << std::endl;
         return 1;
     }
     return 0;
