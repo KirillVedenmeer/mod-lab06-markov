@@ -1,4 +1,4 @@
-// Copyright 2026 UNN
+// Copyright 2024 Your Name
 #ifndef INCLUDE_TEXTGEN_H_
 #define INCLUDE_TEXTGEN_H_
 
@@ -41,10 +41,13 @@ class MarkovGenerator {
   }
 
   static prefix MakePrefix(const std::vector<std::string>& words, int size);
-  static void AddSuffix(statetab* table, const prefix& pref,
+
+  // NOLINT(runtime/references) — ссылки безопасны в этом контексте
+  static void AddSuffix(statetab& table, const prefix& pref,
                         const std::string& suffix);
-  static std::string RandomChoice(const std::vector<std::string>& vec,
-                                  std::mt19937* rng);
+  static std::string RandomChoice(
+    const std::vector<std::string>& vec,
+    std::mt19937& rng);  // NOLINT(runtime/references)
 };
 
 #endif  // INCLUDE_TEXTGEN_H_

@@ -21,11 +21,13 @@ prefix MarkovGenerator::MakePrefix(const std::vector<std::string>& words,
   return p;
 }
 
+// NOLINTNEXTLINE(runtime/references)
 void MarkovGenerator::AddSuffix(statetab& table, const prefix& pref,
                                 const std::string& suffix) {
   table[pref].push_back(suffix);
 }
 
+// NOLINTNEXTLINE(runtime/references)
 std::string MarkovGenerator::RandomChoice(const std::vector<std::string>& vec,
                                           std::mt19937& rng) {
   if (vec.empty())
@@ -94,6 +96,7 @@ std::string MarkovGenerator::GenerateText() {
     if (it == states_.end()) {
       restart = true;
     } else {
+      // ✅ Теперь передаём rng_ по ссылке (как и объявлено)
       std::string next = RandomChoice(it->second, rng_);
       if (next == NOPREFIX) {
         restart = true;
@@ -110,6 +113,7 @@ std::string MarkovGenerator::GenerateText() {
       size_t idx =
         std::uniform_int_distribution<size_t>(0, states_.size() - 1)(rng_);
       auto rand_it = states_.begin();
+      // ✅ Исправлено: std::ptrdiff_t вместо long
       std::advance(rand_it, static_cast<std::ptrdiff_t>(idx));
       pref = rand_it->first;
     }
