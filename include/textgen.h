@@ -1,4 +1,4 @@
-// Copyright 2024 Your Name
+// Copyright 2026 UNN
 #ifndef INCLUDE_TEXTGEN_H_
 #define INCLUDE_TEXTGEN_H_
 
@@ -15,36 +15,36 @@ const char NOPREFIX[] = "\n";
 typedef std::deque<std::string> prefix;
 typedef std::map<prefix, std::vector<std::string>> statetab;
 
-class MarkovGenerator
-{
-private:
-    statetab states_;
-    int prefix_size_;
-    int max_generated_;
-    std::mt19937 rng_;
+class MarkovGenerator {
+ private:
+  statetab states_;
+  int prefix_size_;
+  int max_generated_;
+  std::mt19937 rng_;
 
-public:
-    explicit MarkovGenerator(int pref_size = NPREF,
-                             int max_gen = MAXGEN,
-                             unsigned seed = 42);
+ public:
+  explicit MarkovGenerator(int pref_size = NPREF, int max_gen = MAXGEN,
+                           unsigned seed = 42);
 
-    void ReadInputFile(const std::string &filename);
-    std::string GenerateText();
+  void ReadInputFile(const std::string& filename);
+  std::string GenerateText();
 
-    const statetab &GetStates() const { return states_; }
-    int GetPrefixSize() const { return prefix_size_; }
+  const statetab& GetStates() const {
+    return states_;
+  }
+  int GetPrefixSize() const {
+    return prefix_size_;
+  }
 
-    void AddTestState(const prefix &p, const std::string &suffix)
-    {
-        states_[p].push_back(suffix);
-    }
+  void AddTestState(const prefix& p, const std::string& suffix) {
+    states_[p].push_back(suffix);
+  }
 
-    static prefix MakePrefix(const std::vector<std::string> &words, int size);
-    static void AddSuffix(statetab &table,
-                          const prefix &pref,
-                          const std::string &suffix);
-    static std::string RandomChoice(const std::vector<std::string> &vec,
-                                    std::mt19937 &rng);
+  static prefix MakePrefix(const std::vector<std::string>& words, int size);
+  static void AddSuffix(statetab* table, const prefix& pref,
+                        const std::string& suffix);
+  static std::string RandomChoice(const std::vector<std::string>& vec,
+                                  std::mt19937* rng);
 };
 
-#endif // INCLUDE_TEXTGEN_H_
+#endif  // INCLUDE_TEXTGEN_H_
